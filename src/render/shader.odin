@@ -10,9 +10,9 @@ shader_type :: enum {
 }
 
 shader :: struct {
-	type : 		shader_type,
-	text : 		[^]cstring,
-	line_count: int,
+	type: shader_type,
+	text: []u8,
+	id:   u32,	 
 }
 
 program :: struct {
@@ -23,18 +23,48 @@ program :: struct {
 	EBO: 		   u32,
 	fragment: 	   shader,
 	vertex: 	   shader,
+	program: 	   u32,
 }
 
-loadProgram :: proc(intProgram: program) {
+loadProgram :: proc(intProgram: ^program) {
 	if (resGetResourceIndex(program) == -1) {
 		addResource(program)
 	}
+	intProgram.fragment = loadShader(intProgram.fragment_path, .FRAGMENT_SHADER)
+	intProgram.vertex = loadShader(intProgram.vertex_path, .VERTEX_SHADER)
 
+	intProgram.program = gl.CreateProgram()
+	gl.AttachShader(intProgram.program, intProgram.vertex.id)
+	gl.AttachShader(intProgram.program, intProgram.fragment.id)
+	gl.LinkProgram(intProgram.program)
+
+	success : int
+	info_log : [512]u8
+
+	gl.GetProgramiv(intProgram.program, gl.LINK_STATUS, cast([^]i32)&success)
+	if (success != 1) {
+		gl.GetProgramInfoLog(intProgram.program, 512, nil, cast([^]u8)&info_log)
+		//do the \n hack for removing new lines
+		log("Program compilation error!", .ERR, "Render")
+		log(transmute(string)info_log[:], .ERR, "Render")
+		return
+	}
+
+	gl.UseProgram(intProgram.program);
+
+	gl.GenVertexArrays(1, &intProgram.VAO); 
+	gl.BindVertexArray(intProgram.VAO);
+
+	gl.GenBuffers(1, &intProgram.VBO);
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, intProgram.VBO); 
+	
+	gl.GenBuffers(1, &intProgram.EBO);
 }
 
 
 
-loadShader :: proc(filename: string, type: shader_type) {
+loadShader :: proc(filename: string, type: shader_type) -> (intShader: shader) {
 	if (resGetResourceIndex(shader) == -1) {
 		//init shader resource
 		addResource(shader)
@@ -46,15 +76,63 @@ loadShader :: proc(filename: string, type: shader_type) {
 		return
 	}
 
+	shader_id : u32 = 0
 
+	#partial switch type {
+		case .FRAGMENT_SHADER:
+			shader_id = gl.CreateShader(gl.FRAGMENT_SHADER)
+		case .VERTEX_SHADER:
+			shader_id = gl.CreateShader(gl.VERTEX_SHADER)
+	}
+
+	length := cast(i32)len(shadertext)
+	shader_data_cstring := cstring(raw_data(shadertext))
+
+	gl.ShaderSource(shader_id, 1, &shader_data_cstring, &length)
+	gl.CompileShader(shader_id)
+
+	success : int
+	info_log : [512]u8
+
+	gl.GetShaderiv(shader_id, gl.COMPILE_STATUS, cast([^]i32)&success)
+	if (success != 1) {
+		gl.GetShaderInfoLog(shader_id, 512, nil, cast([^]u8)&info_log)
+		//do the \n hack for removing new lines
+		log("%v compilation error!", .ERR, "Render", type)
+		log(transmute(string)info_log[:], .ERR, "Render")
+		return
+	}
+
+	intShader.type = type
+	intShader.text = shadertext
+	intShader.id = shader_id
+	return
 }
 
-loadShaderData :: proc(shadertext: []u8) -> (intShader: shader) {
-	intShader.text = make([^]cstring)
+/*	glGetShaderiv(fragmentShaderID, GL_COMPILE_STATUS, &success);
+	if (success != GL_TRUE) {
+		glGetShaderInfoLog(fragmentShaderID, 512, NULL, infoLog);
+		*(strchr(infoLog, '\n')) = ' '; //removes the newline opengl shoves in
+		logtofile("Fragment shader compilation error!", ERR, "Render");
+		logtofile(infoLog, ERR, "Render");
+		printf("%s\n", intProgram->fragmentPath);
+		return -1;
+	}*/
+
+
+/*loadShaderData :: proc(shadertext: []u8) -> (intShader: shader) {
+	
+	intShader.text = make([^]cstring, 1)
 	intShader.line_count = 0;
-	//intShader.text[0]
+	for i := 0; i < len(shadertext); i+=1 {
+		if shadertext[i] == '\n' {
+			append_elem(&intShader.text[intShader.line_count], 0)
+			intShader.line_count += 1
+		}
+		append_elem(&intShader.text[intShader.line_count], shadertext[i]) 
+	}
 	return;
-}
+}*/
 
 /*	UNUSED(name);
 	int chunkSize = 256;

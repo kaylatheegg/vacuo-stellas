@@ -27,6 +27,8 @@ initRender :: proc() {
 	glContext = initOpenGLContext()
 }
 
+test_program : program
+
 initOpenGLContext :: proc() -> (intContext: SDL.GLContext) {
 
 	SDL.GL_SetAttribute(.CONTEXT_PROFILE_MASK,  i32(SDL.GLprofile.CORE))
@@ -51,7 +53,10 @@ initOpenGLContext :: proc() -> (intContext: SDL.GLContext) {
 	gl.ClearColor(1, 1, 1, 1);
 	SDL.GL_SetSwapInterval(0);
 
-	loadShader("data/shaders/shader.vs", .VERTEX_SHADER)
-	loadShader("data/shaders/shader.fs", .FRAGMENT_SHADER)
+	test_program.fragment_path = "data/shaders/shader.fs"
+	test_program.vertex_path = "data/shaders/shader.vs"
+
+	loadProgram(&test_program)
+
 	return
 }

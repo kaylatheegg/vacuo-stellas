@@ -7,7 +7,7 @@ import SDL "vendor:sdl2"
 		functions should not need to have an initialiser called unless it is a big function like render,
 		the initialisation should be handled in the first call to that function (e.g load shader)
 
-
+	add unit tests
 
 
 	TODO:
@@ -36,6 +36,8 @@ import SDL "vendor:sdl2"
 */
 
 import "core:fmt"
+import "core:math/rand"
+
 
 main :: proc() {
 	log("Starting engine!", .INF, "Runtime");
@@ -44,6 +46,10 @@ main :: proc() {
 	running : bool = true
 
 	initRender()
+
+	for i := 0; i < 100; i+=1 {
+		addObject(rand.int_max(800 - 64), rand.int_max(600 - 64), 64, 64, "meow")
+	}
 
 	for running {
 		event : SDL.Event
@@ -54,6 +60,8 @@ main :: proc() {
 					running = false;
 			}
 		}
+
+		render()
 
 	}
 

@@ -6,7 +6,7 @@ import "core:runtime"
 
 res_entry :: struct {
 	key: string,
-	value: any,
+	value: ^any,
 }
 
 resource :: struct {
@@ -48,7 +48,7 @@ resPrintElement :: proc($type: typeid, key: string) {
 	log("Could not find key \"%s\" in resource %v", .ERR, "Resources", key, typeid_of(type))
 }
 
-resAddElement :: proc($type: typeid, key: string, value: any) {
+resAddElement :: proc($type: typeid, key: string, value: ^any) {
 	resIndex := resGetResourceIndex(type)
 	if (resIndex == -1) {
 		log("Cannot find resource: %v", .ERR, "Resources", typeid_of(type));
@@ -57,12 +57,14 @@ resAddElement :: proc($type: typeid, key: string, value: any) {
 
 	for i := 0; i < len(resources[resIndex].elements); i+=1 {
 		if resources[resIndex].elements[i].key == key {
-			log("Cannot add duplicate key \"%s\" to resource %v!", .ERR, "Resources", key, typeid_of(type))
-			return
+			//log("Cannot add duplicate key \"%s\" to resource %v!", .ERR, "Resources", key, typeid_of(type))
+			//return
 		}
 	}
 
-	append(&resources[resIndex].elements, res_entry{key, value})
+	value_copy := new(type_of(value))
+	runtime.mem_copy(value_copy, value, size_of(type_of(value)))
+	append(&resources[resIndex].elements, res_entry{key, value_copy^})
 }
 
 resRemoveElement :: proc($type: typeid, key: string) {
@@ -74,6 +76,7 @@ resRemoveElement :: proc($type: typeid, key: string) {
 
 	for i := 0; i < len(resources[resIndex].elements); i+=1 {
 		if resources[resIndex].elements[i].key == key {
+			delete(resources[resIndex].elements.value)
 			unordered_remove(&resources[resIndex].elements, i)
 			return
 		}

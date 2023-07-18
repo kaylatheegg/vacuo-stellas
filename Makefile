@@ -14,6 +14,7 @@ build:
 	cp -r src/init/* 	  build
 	cp -r src/render/* 	  build
 	cp -r src/resources/* build
+	cp -r src/object/*	  build
 	cp src/config.odin    build
 	
 	odin build build/ $(BUILD_FLAGS)
