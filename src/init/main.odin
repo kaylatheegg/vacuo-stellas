@@ -47,9 +47,22 @@ main :: proc() {
 
 	initRender()
 
-	for i := 0; i < 100; i+=1 {
-		addObject(rand.int_max(800 - 64), rand.int_max(600 - 64), 64, 64, "meow")
+	registerTexture("data/images/sand.png", "sand")
+	registerTexture("data/images/player.png", "sand1")
+	registerTexture("data/images/water.png", "sand2")
+	registerTexture("data/images/wall.png", "sand3")
+	registerTexture("data/images/pistol.png", "sand4")
+
+
+	for i := 0; i < 5000; i+=1 {
+		addObject(rand.int_max(800 - 64), rand.int_max(600), 64, 64, "meow", "sand1")
+		addObject(rand.int_max(800 - 64), rand.int_max(600), 64, 64, "meow", "sand")
 	}
+
+	
+
+
+
 
 	for running {
 		event : SDL.Event
