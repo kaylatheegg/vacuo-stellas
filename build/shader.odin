@@ -16,22 +16,27 @@ shader :: struct {
 }
 
 program :: struct {
-	fragment_path: string,
-	vertex_path:   string,
-	VAO: 		   u32,
-	VBO: 		   u32,
-	EBO: 		   u32,
-	fragment: 	   shader,
-	vertex: 	   shader,
-	program: 	   u32,
+	fragment_path:  string,
+	vertex_path:    string,
+	name: 		    string,
+	VAO: 		    u32,
+	VBO: 		    u32,
+	EBO: 		    u32,
+	fragment: 	    shader,
+	vertex: 	    shader,
+	program: 	    u32,
+	renderCallback: proc(this: ^program)
 }
 
-loadProgram :: proc(intProgram: ^program) {
+loadProgram :: proc(fragment_path, vertex_path, name: string, callback: proc(this: ^program)) {
 	if (resGetResourceIndex(program) == -1) {
 		addResource(program)
 	}
-	intProgram.fragment = loadShader(intProgram.fragment_path, .FRAGMENT_SHADER)
-	intProgram.vertex = loadShader(intProgram.vertex_path, .VERTEX_SHADER)
+	intProgram : program
+	intProgram.fragment = loadShader(fragment_path, .FRAGMENT_SHADER)
+	intProgram.vertex = loadShader(vertex_path, .VERTEX_SHADER)
+	intProgram.name = name
+	intProgram.renderCallback = callback
 
 	intProgram.program = gl.CreateProgram()
 	gl.AttachShader(intProgram.program, intProgram.vertex.id)
@@ -60,6 +65,8 @@ loadProgram :: proc(intProgram: ^program) {
 	gl.BindBuffer(gl.ARRAY_BUFFER, intProgram.VBO); 
 	
 	gl.GenBuffers(1, &intProgram.EBO);
+
+	resAddElement(program, intProgram.name, intProgram)
 }
 
 

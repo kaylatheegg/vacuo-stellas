@@ -15,12 +15,13 @@ build:
 	cp -r src/render/* 	  build
 	cp -r src/resources/* build
 	cp -r src/object/*	  build
+	cp -r src/utils/*	  build
+	cp -r src/entity/*	  build
+
 	cp src/config.odin    build
 	
+
 	odin build build/ $(BUILD_FLAGS)
 
 run: build
 	./vacuo-stellas
-
-test: build
-	@comet test/gputest.bin -debug

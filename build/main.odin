@@ -2,6 +2,7 @@ package vacuostellas
 
 import SDL "vendor:sdl2"
 
+
 /*
 	design to follow:
 		functions should not need to have an initialiser called unless it is a big function like render,
@@ -16,9 +17,12 @@ import SDL "vendor:sdl2"
 			Add support for stacktraces
 
 		-Render
-			Implement OGL renderer for objects (this is gonna be agonising)
+			change the vertices to internally use vec2s
+			add a system to allow more than one font at a time
+
 		-Objects
-			Copy impl from C game engine
+			restitching the atlas could corrupt old object vertex texcoords. fix this
+
 		-Entities
 			Implement functionality via entity component system
 
@@ -37,7 +41,13 @@ import SDL "vendor:sdl2"
 
 import "core:fmt"
 import "core:math/rand"
+import "core:math"
 
+testEntityProc :: proc(this: ^entity, data: rawptr) {
+	(cast(^f32)data)^ += 0.01/3.14159
+	this.object.angle = (cast(^f32)data)^
+	objUpdate(this.object)
+}
 
 main :: proc() {
 	log("Starting engine!", .INF, "Runtime");
@@ -53,15 +63,14 @@ main :: proc() {
 	registerTexture("data/images/wall.png", "sand3")
 	registerTexture("data/images/pistol.png", "sand4")
 
+	initText()
 
-	for i := 0; i < 5000; i+=1 {
-		addObject(rand.int_max(800 - 64), rand.int_max(600), 64, 64, "meow", "sand1")
-		addObject(rand.int_max(800 - 64), rand.int_max(600), 64, 64, "meow", "sand")
+	for i := 0; i < 10000; i+=1 {
+		//addObject(cast(f32)rand.int_max(800 - 64), cast(f32)(64 + rand.int_max(800 - 64)), 64., 64., cast(f32)(rand.int_max(180))/3.14159, "meow", "sand1")
+		//addObject(cast(f32)rand.int_max(800 - 64), cast(f32)(64 + rand.int_max(800 - 64)), 64., 64., cast(f32)(rand.int_max(180))/3.14159, "meow", "sand")
 	}
 
-	
-
-
+	addEntity(400., 400., 64., 64., 0., "meow", "sand3", testEntityProc, 0)
 
 
 	for running {
@@ -74,9 +83,11 @@ main :: proc() {
 			}
 		}
 
+		tickEntities()
 		render()
 
 	}
 
+	free_all()
 	return;
 }

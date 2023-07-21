@@ -5,6 +5,8 @@ import SDL_IMG "vendor:sdl2/image"
 import gl "vendor:OpenGL"
 
 import "core:slice"
+import "core:fmt"
+
 
 texture :: struct {
 	filename: string,
@@ -88,7 +90,7 @@ stitchAtlas :: proc() {
 		}
 
 		if (yPos + textureatlas.entries[i].h) > cast(i32)textureatlas.size {
-			//we're too big, we need to resize and reset.
+			//we're too small, we need to resize and reset.
 			textureatlas.size *= 2
 			i := 0 //this is hacky. figure out a better way of doing this
 			xPos = 0
@@ -124,6 +126,7 @@ stitchAtlas :: proc() {
 	for entry, index in textureatlas.entries {
 		int_texture := regGetElement(texture, textureatlas.entries[index].key) //this WILL be a source of slowdown
 		SDL.BlitSurface(int_texture.texture, nil, textureatlas.surface, &(SDL.Rect){entry.x, entry.y, entry.w, entry.h})
+		fmt.printf("key:{} index:{} x:{}, y:{}, w:{}, h:{}\n", textureatlas.entries[index].key, index, entry.x, entry.y, entry.w, entry.h)
 	}
 
 	textureatlas.w = totalMaxW
