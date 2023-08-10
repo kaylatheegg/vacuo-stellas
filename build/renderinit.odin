@@ -50,8 +50,5 @@ initOpenGLContext :: proc() -> (intContext: SDL.GLContext) {
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);  
 	gl.ClearColor(1, 1, 1, 1);
 	SDL.GL_SetSwapInterval(0);
-
-	loadProgram("data/shaders/shader.fs", "data/shaders/shader.vs", "Object Renderer", objectRender) //object shader
-
 	return
 }

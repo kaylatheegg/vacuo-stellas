@@ -45,7 +45,22 @@ regGetElement :: proc($type: typeid, key: string) -> (value: type) {
 			return (cast(^type)registries[regIndex].elements[i].value)^
 		}
 	}
-	assert(1==0, "THIS IS UNREACHABLE!")
+	return;
+}
+
+regGetElementPointer :: proc($type: typeid, key: string) -> (value: ^type) {
+	regIndex := regGetRegistryIndex(type)
+	if (regIndex == -1) {
+		log("Cannot find registry: %v", .ERR, "Registries", typeid_of(type));
+		return;
+	}
+
+	for i := 0; i < len(registries[regIndex].elements); i+=1 {
+		if registries[regIndex].elements[i].key == key {
+			return cast(^type)registries[regIndex].elements[i].value
+		}
+	}
+
 	return;
 }
 

@@ -61,6 +61,15 @@ registerTexture :: proc(filename: string, name: string) {
 	stitchAtlas()
 }
 
+getAtlasEntry :: proc(name: string) -> atlas_entry {
+	for entry in textureatlas.entries {
+		if (entry.key == name) {
+			return entry
+		}
+	}
+	return textureatlas.entries[0]
+}
+
 //atlas stitching
 //gonna use a naive packing approach that is just stack right until full, then stack up
 //if we're out of space? we double the atlas size, and then re-run the algorithm
@@ -126,7 +135,7 @@ stitchAtlas :: proc() {
 	for entry, index in textureatlas.entries {
 		int_texture := regGetElement(texture, textureatlas.entries[index].key) //this WILL be a source of slowdown
 		SDL.BlitSurface(int_texture.texture, nil, textureatlas.surface, &(SDL.Rect){entry.x, entry.y, entry.w, entry.h})
-		fmt.printf("key:{} index:{} x:{}, y:{}, w:{}, h:{}\n", textureatlas.entries[index].key, index, entry.x, entry.y, entry.w, entry.h)
+		//fmt.printf("key:{} index:{} x:{}, y:{}, w:{}, h:{}\n", textureatlas.entries[index].key, index, entry.x, entry.y, entry.w, entry.h)
 	}
 
 	textureatlas.w = totalMaxW

@@ -10,8 +10,6 @@ vs_recti32 :: struct {
 	x, y, w, h: i32
 }
 
-radian :: f32
-
 object :: struct {
 	using pos: vs_rectf32,
 	angle: radian,
@@ -39,6 +37,7 @@ getObjectByID :: proc(id : u32) -> ^object { //we need to find a better system o
 addObject :: proc(x, y, w, h: f32, angle: radian, name: string, texture_name: string) -> (id: u32) {
 	if (resGetResourceIndex(object) == -1) {
 		addResource(object)
+		loadProgram("data/shaders/shader.fs", "data/shaders/shader.vs", "Object Renderer", objectRender) //object shader
 	}
 
 	int_entry : atlas_entry
@@ -69,12 +68,15 @@ addObject :: proc(x, y, w, h: f32, angle: radian, name: string, texture_name: st
 }
 
 objCreateVertices :: proc(rect: vs_rectf32, tx_info: vs_recti32, angle: radian) -> u32 {
+	obj_program := resGetElementPointer(program, "Object Renderer")
+
 	vertexalloc  := make([]f32, 16)
 	elementalloc := make([]u32, 6)
-	append(&vertices, ..vertexalloc[:])
-	append(&elements, ..elementalloc[:])
-	objUpdateVertices(cast(u32)(len(vertices)/16) - 1, rect, tx_info, angle)
-	return cast(u32)len(vertices)/16 - 1
+	append(&obj_program.vertices, ..vertexalloc[:])
+	append(&obj_program.elements, ..elementalloc[:])
+
+	objUpdateVertices(cast(u32)(len(obj_program.vertices)/16) - 1, rect, tx_info, angle)
+	return cast(u32)len(obj_program.vertices)/16 - 1
 }
 
 objUpdate :: proc(this: ^object) {
@@ -82,11 +84,12 @@ objUpdate :: proc(this: ^object) {
 }
 
 objUpdateVertices :: proc(id: u32, rect: vs_rectf32, tx_info: vs_recti32, angle: radian) {
-	if (id > cast(u32)len(vertices)/16) {
+	obj_program := resGetElementPointer(program, "Object Renderer")
+
+	if (id > cast(u32)len(obj_program.vertices)/16) {
 		log("Attempted to update vertex id which was out of the bounds of the vertex array! ID:{}", .ERR, "Render", id)
 		return
 	}
-
 	//setup vertices like so:
 	//where 0 is the x,y coord of the object 
 	
@@ -137,6 +140,7 @@ objUpdateVertices :: proc(id: u32, rect: vs_rectf32, tx_info: vs_recti32, angle:
 		}
 	}
 	
+
 	//fmt.printf("1: {}, {}\n2: {}, {}\n3: {}, {}\n4: {}, {}\n", vertices[0][0], vertices[0][1], vertices[1][0], vertices[1][1], vertices[2][0], vertices[2][1], vertices[3][0], vertices[3][1])
 	int_elements : [6]u32
 	//use two tris, 013, 032. both triangles should have the same chirality
@@ -149,12 +153,12 @@ objUpdateVertices :: proc(id: u32, rect: vs_rectf32, tx_info: vs_recti32, angle:
 
 	for i:u32=0; i<4; i+=1 {
 		for j:u32=0; j<4; j+=1 {
-			vertices[id * 16 + 4*i + j] = int_vertices[i][j]
+			obj_program.vertices[id * 16 + 4*i + j] = int_vertices[i][j]
 		}
 	}
 
 	for i:u32=0; i<6; i+=1 {
-		elements[id*6 + i] = int_elements[i]
+		obj_program.elements[id * 6 + i] = int_elements[i]
 	}
-
+	
 }

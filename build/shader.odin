@@ -25,7 +25,9 @@ program :: struct {
 	fragment: 	    shader,
 	vertex: 	    shader,
 	program: 	    u32,
-	renderCallback: proc(this: ^program)
+	renderCallback: proc(this: ^program),
+	vertices:       [dynamic]f32,
+	elements:       [dynamic]u32,
 }
 
 loadProgram :: proc(fragment_path, vertex_path, name: string, callback: proc(this: ^program)) {

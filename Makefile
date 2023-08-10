@@ -17,6 +17,7 @@ build:
 	cp -r src/object/*	  build
 	cp -r src/utils/*	  build
 	cp -r src/entity/*	  build
+	cp -r src/entities/*  build
 
 	cp src/config.odin    build
 	

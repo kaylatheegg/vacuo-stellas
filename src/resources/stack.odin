@@ -41,11 +41,11 @@ findStack :: proc(name: string) -> ^stack {
 		}
 	}
 
-	log("Could not find stack {}", .ERR, "Stack", name)
+	//log("Could not find stack {}", .ERR, "Stack", name)
 	return nil
 }
 
-popStack :: proc(name: string) -> (stack_value: $T) {
+popStack :: proc(name: string) -> (rawptr) {
 	int_stack := findStack(name)
 	
 	if int_stack == nil {
@@ -58,36 +58,35 @@ popStack :: proc(name: string) -> (stack_value: $T) {
 
 	#partial switch int_stack.stack_type {
 		case .FIFO:
-			value := int_stack[0]
+			value := int_stack.elements[0]
 			unordered_remove(&int_stack.elements, 0)
-			return cast(int_stack.type)value
+			return value
 		case .FILO:
-			value := int_stack[len(int_stack.elements) - 1]
+			value := int_stack.elements[len(int_stack.elements) - 1]
 			unordered_remove(&int_stack.elements, len(int_stack.elements) - 1)
-			return cast(int_stack.type)value
+			return value
 	}
+	return nil
 }
 
-pushStack :: proc(name: string, value: $T) {
+pushStack :: proc(name: string, value: $t) {
 	int_stack := findStack(name)
 
 	if int_stack == nil {
 		return 
 	}
 
-	if int_stack.type != typeid_of(value) {
-		log("Type mismatch in stack {}! Expected type: %v, recieved type: %v", .ERR, "Stack", name, int_stack.type, typeid_of(value))
+	if int_stack.type != typeid_of(type_of(value)) {
+		log("Type mismatch in stack {}! Expected type: %v, recieved type: %v", .ERR, "Stack", name, int_stack.type, typeid_of(type_of(value)))
 		return
 	}
 
 	#partial switch int_stack.stack_type {
 		case .FIFO: fallthrough
 		case .FILO:
-			int_value = make(typeid_of(value))
-			^int_value = value
+			int_value := new(t)
+			int_value^ = value
 			append(&int_stack.elements, int_value)
 		
 	}
-
-
 }

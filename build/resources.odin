@@ -69,6 +69,23 @@ resGetElement :: proc($type: typeid, key: string) -> (value: type) {
 	return;
 }
 
+resGetElementPointer :: proc($type: typeid, key: string) -> (value: ^type) {
+	resIndex := resGetResourceIndex(type)
+	if (resIndex == -1) {
+		log("Cannot find resource: %v", .ERR, "Resources", typeid_of(type));
+		return;
+	}
+
+	for i := 0; i < len(resources[resIndex].elements); i+=1 {
+		if resources[resIndex].elements[i].key == key {
+			return cast(^type)resources[resIndex].elements[i].value
+		}
+	}
+
+	assert(1==0, "THIS IS UNREACHABLE!")
+	return;
+}
+
 resGetElementByID :: proc($type: typeid, id: u32) -> (value: type) {
 	assert(1==0, "implement this!")
 	resIndex := resGetResourceIndex(type)

@@ -18,8 +18,7 @@ import SDL "vendor:sdl2"
 
 		-Render
 			change the vertices to internally use vec2s
-			add a system to allow more than one font at a time
-
+			
 		-Objects
 			restitching the atlas could corrupt old object vertex texcoords. fix this
 
@@ -30,6 +29,9 @@ import SDL "vendor:sdl2"
 			do this later
 		-UI elements
 			Port over the C UI element stuff
+			redo text rendering to use a baked stb text atlas
+			add a system to allow more than one font at a time
+
 		-Debug UI via imgui
 		-Utils
 			See what odin doesnt have and implement our own 
@@ -65,9 +67,8 @@ main :: proc() {
 
 	initText()
 
-	for i := 0; i < 10000; i+=1 {
-		//addObject(cast(f32)rand.int_max(800 - 64), cast(f32)(64 + rand.int_max(800 - 64)), 64., 64., cast(f32)(rand.int_max(180))/3.14159, "meow", "sand1")
-		//addObject(cast(f32)rand.int_max(800 - 64), cast(f32)(64 + rand.int_max(800 - 64)), 64., 64., cast(f32)(rand.int_max(180))/3.14159, "meow", "sand")
+	for i := 0; i < 100; i+=1 {
+		createBall((vec2f){vfuRand(0, 800), vfuRand(0, 600)})
 	}
 
 	addEntity(400., 400., 64., 64., 0., "meow", "sand3", testEntityProc, 0)
@@ -82,10 +83,11 @@ main :: proc() {
 					running = false;
 			}
 		}
-
+		
 		tickEntities()
 		render()
 
+		SDL.Delay(17)
 	}
 
 	free_all()

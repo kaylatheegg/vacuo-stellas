@@ -4,9 +4,11 @@ package vacuostellas
 
 import "core:math"
 
-vec2f :: [2]f32
-vec2i :: [2]i32
-mat2f :: matrix[2,2]f32
+
+radian :: f32
+vec2f  :: [2]f32
+vec2i  :: [2]i32
+mat2f  :: matrix[2,2]f32
 
 
 mat2Rotate :: proc(angle: radian) -> mat2f { //counter clockwise rotation 
