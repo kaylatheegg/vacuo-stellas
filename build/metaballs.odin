@@ -12,7 +12,7 @@ metaBallCallback :: proc(this: ^entity, data: rawptr) {
 	}
 
 	if ball_data.pos.y > SCREEN_HEIGHT || ball_data.pos.y < 0 {
-		ball_data.vel.y *= -1
+		ball_data.vel.y *= -0.8
 	}
 
 	ball_data.pos.x += ball_data.vel.x
@@ -38,10 +38,10 @@ createBall :: proc(pos: vec2f) {
 	int_stack := findStack("metaballs")
  
 	//generate a random radius from 16-64, uniformly distributed so the average ball size is 40
-	radius : f32 = vfuRand(10, 40)
+	radius : f32 = vfnRand(16, 64)
 	data := (ballData){radius, (vec2f){pos.x, pos.y}, (vec2f){vfuRand(-3, 3), vfuRand(0, -2)}, cast(i32)len(int_stack.elements)}
 	
-	addEntity(pos.x, pos.y, 64, 64, 0, "Ball", "DEFAULT", metaBallCallback, data)
+	addEntity(pos.x, pos.y, 0, 0, 0, "Ball", "DEFAULT", metaBallCallback, data)
 	pushStack("metaballs", data)
 
 }

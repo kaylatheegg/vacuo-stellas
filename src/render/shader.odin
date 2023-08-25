@@ -52,7 +52,7 @@ loadProgram :: proc(fragment_path, vertex_path, name: string, callback: proc(thi
 	if (success != 1) {
 		gl.GetProgramInfoLog(intProgram.program, 512, nil, cast([^]u8)&info_log)
 		//do the \n hack for removing new lines
-		log("Program compilation error!", .ERR, "Render")
+		log("Program \"%s\" compilation error!", .ERR, "Render", name)
 		log(transmute(string)info_log[:], .ERR, "Render")
 		return
 	}
@@ -67,6 +67,8 @@ loadProgram :: proc(fragment_path, vertex_path, name: string, callback: proc(thi
 	gl.BindBuffer(gl.ARRAY_BUFFER, intProgram.VBO); 
 	
 	gl.GenBuffers(1, &intProgram.EBO);
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, intProgram.EBO);
 
 	resAddElement(program, intProgram.name, intProgram)
 }
@@ -107,9 +109,9 @@ loadShader :: proc(filename: string, type: shader_type) -> (intShader: shader) {
 	if (success != 1) {
 		gl.GetShaderInfoLog(shader_id, 512, nil, cast([^]u8)&info_log)
 		//do the \n hack for removing new lines
-		log("%v compilation error!", .ERR, "Render", type)
-		log(transmute(string)info_log[:], .ERR, "Render")
-		return
+		log("%v compilation error! Crashing.", .SVR, "Render", type)
+		log(transmute(string)info_log[:], .SVR, "Render")
+		crash()
 	}
 
 	intShader.type = type

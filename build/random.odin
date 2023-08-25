@@ -12,25 +12,27 @@ for the range (a,b) distributed normally,
 
        b+a    b-a ⌠ x    ⎛-t²⎞
 F(x) = ⎻⎻⎻  + ⎻⎻⎻ ⎮   exp⎜⎻⎻⎻⎟ dt
-		2     √̅2̅π ⌡-∞    ⎝ 2 ⎠
+	 2     √̅2̅π ⌡-∞    ⎝ 2 ⎠
 
 generate a random number from -√̅a to √̅a uniformly to sample
 
 we can use the fact that the above integral is equivalent to
-sqrt(pi/2) * erf(t/√̅2) to calculate this slightly easier
+sqrt(pi/2) * erf(x/√̅2) to calculate this slightly easier
 
 we can also approximate the error function as:
 
          2
-erf(x) = ⎻ arctan(2t(1 + t⁴))
+erf(x) = ⎻ arctan(2x(1 + x⁴))
          π
 
 this is accurate to within 2%
 
 actual formula used:
-       b+a   b-a ⎾2 2      
+let t = x/√̅2
+
+       b+a   b-a ⎾π 2      
 F(x) = ⎻⎻⎻ + ⎻⎻⎻ ⎮⎻ ⎻arctan(2t(1 + t⁴))
-        2    √̅2̅π ⎷π π
+        2    √̅2̅π ⎷2 π
 */
 
 //do not trust these to be accurate.

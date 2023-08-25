@@ -15,7 +15,7 @@ void main() {
         v += r * r / (dx * dx + dy * dy);
     }
 
-    vec3 color = vec3(0.1, 0.78, 0.128);
+    vec3 color = vec3(0.1, 0.18, 0.98);
 
     if (v > 1.0) {
         if (v > 2) {

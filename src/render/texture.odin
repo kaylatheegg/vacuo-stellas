@@ -15,8 +15,7 @@ texture :: struct {
 
 atlas_entry :: struct {
 	key: string,
-	x,y: i32,
-	w,h: i32,
+	using rect: vs_recti32,
 }
 
 atlas :: struct {
@@ -45,7 +44,7 @@ registerTexture :: proc(filename: string, name: string) {
 		}
 
 		regAddElement(texture, "DEFAULT", int_texture)
-		append(&textureatlas.entries, (atlas_entry){"DEFAULT", 0, 0, int_texture.texture.w, int_texture.texture.h})
+		append(&textureatlas.entries, (atlas_entry){"DEFAULT", (vs_recti32){0, 0, int_texture.texture.w, int_texture.texture.h}})
 	}	
 	int_texture : texture
 	int_texture.filename = filename
@@ -57,7 +56,7 @@ registerTexture :: proc(filename: string, name: string) {
 
 
 	regAddElement(texture, name, int_texture)
-	append(&textureatlas.entries, (atlas_entry){name, 0, 0, int_texture.texture.w, int_texture.texture.h})
+	append(&textureatlas.entries, (atlas_entry){name, (vs_recti32){0, 0, int_texture.texture.w, int_texture.texture.h}})
 	stitchAtlas()
 }
 
@@ -91,7 +90,8 @@ stitchAtlas :: proc() {
 	xPos = 64
 	maxH = 64
 
-	for entry, i in textureatlas.entries[1:] {
+	for i := 0; i < len(textureatlas.entries[:]) - 1; i+=1 {
+		entry := textureatlas.entries[i]
 		if (xPos + textureatlas.entries[i].w) > cast(i32)textureatlas.size {
 			yPos += maxH
 			xPos = 0
@@ -101,11 +101,12 @@ stitchAtlas :: proc() {
 		if (yPos + textureatlas.entries[i].h) > cast(i32)textureatlas.size {
 			//we're too small, we need to resize and reset.
 			textureatlas.size *= 2
-			i := 0 //this is hacky. figure out a better way of doing this
+			i = 0 //this is hacky. figure out a better way of doing this
 			xPos = 0
 			yPos = 0
 			maxH = 0
-			break
+			//fmt.printf("current size: {} entries: {}\n", textureatlas.size, len(textureatlas.entries))
+			continue
 		}
 
 		textureatlas.entries[i].x = xPos
@@ -124,6 +125,7 @@ stitchAtlas :: proc() {
 		if (totalMaxW < xPos) {
 			totalMaxW = xPos
 		}
+		//fmt.printf("i: {}, xPos: {}, yPos: {} w: {} h: {}\n", i, xPos, yPos, textureatlas.entries[i].w, textureatlas.entries[i].h)
 	}
 
 	if (textureatlas.surface != nil) {

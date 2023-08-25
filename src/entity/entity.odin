@@ -30,7 +30,7 @@ addEntity :: proc(x, y, w, h: f32, angle: radian, name: string, texture_name: st
 
 tickEntities :: proc() {
 	if (resGetResourceIndex(entity) == -1) {
-		log("Entities not initialised yet!", .ERR, "Entity")
+		//log("Entities not initialised yet!", .ERR, "Entity")
 		return
 	}
 

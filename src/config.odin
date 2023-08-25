@@ -4,3 +4,7 @@ package vacuostellas
 
 SCREEN_WIDTH :: 800
 SCREEN_HEIGHT :: 800
+
+targetFPS : f32 = 60
+
+FPS_SAMPLES :: 60

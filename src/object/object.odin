@@ -40,16 +40,7 @@ addObject :: proc(x, y, w, h: f32, angle: radian, name: string, texture_name: st
 		loadProgram("data/shaders/shader.fs", "data/shaders/shader.vs", "Object Renderer", objectRender) //object shader
 	}
 
-	int_entry : atlas_entry
-
-	int_entry = textureatlas.entries[0] //DEFAULT entry, as long as textures exist
-
-	for entry in textureatlas.entries {
-		if entry.key == texture_name {
-			int_entry = entry
-			break
-		}
-	}
+	int_entry := getAtlasEntry(texture_name)
 
 	if (int_entry == textureatlas.entries[0] && texture_name != "DEFAULT") {
 		log("Texture \"{}\" does not exist! Loading default.", .ERR, "Object", texture_name)

@@ -34,8 +34,8 @@ text_entry :: struct {
 	font: string,
 }
 
-printText :: proc(pos: vec2i, text: string, font:= "DEFAULT") {
-	pushStack("text", (text_entry){pos, text, font})
+printText :: proc(pos: vec2i, text: string, font:="DEFAULT") {
+	pushStack("text", (text_entry){pos, fmt.aprintf("{}", text), font})
 }
 
 getFont :: proc(name: string) -> font {
@@ -65,7 +65,6 @@ loadFont :: proc(path, name: string) {
 	}
 
 	intFont.scale = stbtt.ScaleForPixelHeight(&intFont.info, 64) //maybe do this differently?
-
 
 	stbtt.GetFontVMetrics(&intFont.info, &intFont.ascent, &intFont.descent, &intFont.line_gap)
 
@@ -115,7 +114,7 @@ loadFont :: proc(path, name: string) {
 		}
 
 		regAddElement(texture, char_name, (texture){char_name, char_surface})
-		append(&textureatlas.entries, (atlas_entry){char_name, 0, 0, char_surface.w, char_surface.h})
+		append(&textureatlas.entries, (atlas_entry){char_name, (vs_recti32){0, 0, char_surface.w, char_surface.h}})
 	}
 	regAddElement(font, intFont.name, intFont)
 	stitchAtlas()
