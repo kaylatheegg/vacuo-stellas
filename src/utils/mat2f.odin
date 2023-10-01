@@ -21,3 +21,7 @@ mat2Rotate :: proc(angle: radian) -> mat2f { //counter clockwise rotation
 vec2RotatePoint :: proc(a: vec2f, origin: vec2f, angle: radian) -> vec2f {
 	return origin + mat2Rotate(angle) * (a - origin) 
 }
+
+vec2fDot :: proc (a, b: vec2f) -> f32 {
+	return a.x * b.x + a.y * b.y
+}

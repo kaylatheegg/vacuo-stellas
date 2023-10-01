@@ -28,6 +28,15 @@ addEntity :: proc(x, y, w, h: f32, angle: radian, name: string, texture_name: st
 	return entity_id
 }
 
+getEntity :: proc(id: u32) -> ^entity { 
+	for entry in (getResource(entity)).elements {
+		if (cast(^entity)entry.value).entityID == id {
+			return (cast(^entity)entry.value)
+		}
+	}
+	return nil
+}
+
 tickEntities :: proc() {
 	if (resGetResourceIndex(entity) == -1) {
 		//log("Entities not initialised yet!", .ERR, "Entity")

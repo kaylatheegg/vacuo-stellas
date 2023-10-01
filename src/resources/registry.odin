@@ -51,7 +51,7 @@ regGetElement :: proc($type: typeid, key: string) -> (value: type) {
 regGetElementPointer :: proc($type: typeid, key: string) -> (value: ^type) {
 	regIndex := regGetRegistryIndex(type)
 	if (regIndex == -1) {
-		log("Cannot find registry: %v", .ERR, "Registries", typeid_of(type));
+		//log("Cannot find registry: %v to get element pointer", .ERR, "Registries", typeid_of(type));
 		return;
 	}
 
@@ -68,7 +68,7 @@ regAddElement :: proc($type: typeid, key: string, value: $T) {
 	value := value
 	regIndex := regGetRegistryIndex(type)
 	if (regIndex == -1) {
-		log("Cannot find registry: %v", .ERR, "Registries", typeid_of(type));
+		log("Cannot find registry: %v to add element", .ERR, "Registries", typeid_of(type));
 		return;
 	}
 

@@ -2,7 +2,7 @@ package vacuostellas
 
 import "core:fmt"
 import gl "vendor:OpenGL"
-
+import SDL "vendor:sdl2"
 
 /*
 UI TODO:
@@ -37,10 +37,29 @@ button :: struct {
 	txinfo: vs_recti32,
 }
 
+buttonWatchdog :: proc(this: ^entity, data: rawptr) {
+	if resGetResourceIndex(button) == -1 {
+		log("Tried to get the button resource in the BW, this has failed!", .SVR, "UI")
+		crash()
+	}
+	buttons := getResource(button)
+	for i:=0; i < len(buttons.elements); i+=1 {
+		int_button := (cast(^button)buttons.elements[i].value)^
+		x,y : i32
+		mouse_state := SDL.GetMouseState(&x, &y)
+		if pointInBB(int_button.bb, (vec2f){f32(x), f32(y)}) {
+			if mouse_state & SDL.BUTTON_LMASK == 1 {
+				int_button->callback()
+			}
+		}
+	}
+}
+
 createButton :: proc(bb: vs_rectf32, name: string, data: $T, callback: proc(^button), type: button_type, args: ..any) {
 	if resGetResourceIndex(button) == -1 {
 		addResource(button)
-		
+		loadProgram("data/shaders/button.fs", "data/shaders/button.vs", "Button Renderer", buttonRender)
+		addEntity(0, 0, 0., 0., 0, "Button Watchdog", "DEFAULT", buttonWatchdog, 0)
 	}
 
 	if (type == .FLAT || type == .GRADIENT) && type_of(args[0]) == typeid_of(texture) {

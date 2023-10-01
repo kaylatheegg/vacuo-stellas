@@ -38,8 +38,8 @@ createBall :: proc(pos: vec2f) {
 	int_stack := findStack("metaballs")
  
 	//generate a random radius from 16-64, uniformly distributed so the average ball size is 40
-	radius : f32 = vfnRand(16, 64)
-	data := (ballData){radius, (vec2f){pos.x, pos.y}, (vec2f){vfuRand(-3, 3), vfuRand(0, -2)}, cast(i32)len(int_stack.elements)}
+	radius : f32 = 32
+	data := (ballData){radius, (vec2f){pos.x, pos.y}, (vec2f){vfuRand(-3, 3), vfuRand(-2, 0)}, cast(i32)len(int_stack.elements)}
 	
 	addEntity(pos.x, pos.y, 0, 0, 0, "Ball", "DEFAULT", metaBallCallback, data)
 	pushStack("metaballs", data)

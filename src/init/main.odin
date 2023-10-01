@@ -58,6 +58,12 @@ testEntityProc :: proc(this: ^entity, data: rawptr) {
 
 deltaTime : f32 = 15
 
+testButtion :: proc(this: ^button) {
+	fmt.printf("TEST!!\n")
+}
+
+keyboardState : [^]u8
+
 main :: proc() {
 	log("Starting engine!", .INF, "Runtime");
 	SDL.Init({.TIMER, .VIDEO, .EVENTS});
@@ -66,21 +72,20 @@ main :: proc() {
 
 	initRender()
 
-	registerTexture("data/images/sand.png", "sand")
-	registerTexture("data/images/player.png", "sand1")
-	registerTexture("data/images/water.png", "sand2")
-	registerTexture("data/images/wall.png", "sand3")
-	registerTexture("data/images/pistol.png", "sand4")
+	registerTexture("data/images/tiles/sand.png", "sand")
 
 	initText()
 
-	for i := 0; i < 45; i+=1 {
-		addEntity(vfuRand(0., 800.), vfuRand(0., 800.), 64., 64., 0, "meow", "sand3", testEntityProc, vfuRand(0., 360.))
+	addEntity(0, 0, 0, 0, 0, "camera", "DEFAULT", cameraCallback, 0)
+
+
+	for i :i32= 0; i < 128; i+=1 {
+		for j :i32= 0; j < 128; j+=1 {
+			if (i*j) % 8 == 0 {
+				createTile(j, i, .GRASS)
+			}
+		}		
 	}
-	//loadProgram("data/shaders/button.fs", "data/shaders/button.vs", "Button Renderer", buttonRender)
-	//createButton((vs_rectf32){300, 400, 80, 60}, "test button", 0, nil, .FLAT, (RGBA){rgba = 0x12345678})
-	
-	
 
 	addStack(f32, "fpsStack", .FIFO)
 
@@ -90,12 +95,16 @@ main :: proc() {
 		//move event stuff out to somewhere seperate
 		event : SDL.Event
 
+		//read keyboard inputs
+
 		for (SDL.PollEvent(&event)) {
 			#partial switch event.type {
 				case .QUIT: 
 					running = false;
 			}
 		}
+
+		keyboardState = SDL.GetKeyboardState(nil)
 		
 		tickEntities()
 		render()

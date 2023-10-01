@@ -18,3 +18,31 @@ vsmapArray :: proc(array: ^[]f32, a, b, A, B:f32) {
 		array[index] = vsmap(array[index], a, b, A, B)
 	}
 }
+
+vslerp :: proc(w, a, b: f32) -> f32 {
+	if w < 0 {
+		return a
+	}
+
+	if w > 1 {
+		return b
+	}
+
+	return ((b-a) * w + a)
+}
+
+orientation :: enum {
+	COLINEAR,
+	CLOCKWISE,
+	COUNTER_CLOCKWISE,
+}
+
+vsOrientation :: proc(a, b, c: vec2f) -> orientation { //outer product, discard the other elements. i dont understand how this works
+	orientation := (b.y - a.y) * (c.x - b.x) -
+				   (b.x - a.x) * (c.y - b.y)
+	
+	if orientation == 0 {
+		return .COLINEAR
+	}
+	return (orientation > 0) ? .CLOCKWISE : .COUNTER_CLOCKWISE
+}

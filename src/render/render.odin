@@ -29,15 +29,24 @@ objectRender :: proc(this: ^program) {
 	gl.UseProgram(this.program)
 	gl.BindVertexArray(this.VAO)
 
-	posAttrib := gl.GetAttribLocation(this.program, "position")
-	gl.VertexAttribPointer(cast(u32)posAttrib, 2, gl.FLOAT, gl.FALSE, 4*size_of(f32), 0) 
-	gl.EnableVertexAttribArray(cast(u32)posAttrib)
+	if this.first_run == true {
+		gl.BindVertexArray(this.VAO)
+		gl.BindBuffer(gl.ARRAY_BUFFER, this.VBO)
+		gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.EBO)
+		posAttrib := gl.GetAttribLocation(this.program, "position")
+		gl.VertexAttribPointer(cast(u32)posAttrib, 2, gl.FLOAT, gl.FALSE, 4*size_of(f32), 0) 
+		gl.EnableVertexAttribArray(cast(u32)posAttrib)
 
-	texAttrib := gl.GetAttribLocation(this.program, "texcoord")
-	gl.VertexAttribPointer(cast(u32)texAttrib, 2, gl.FLOAT, gl.FALSE, 4*size_of(f32), 2*size_of(f32)) 
-	gl.EnableVertexAttribArray(cast(u32)texAttrib)
+		texAttrib := gl.GetAttribLocation(this.program, "texcoord")
+		gl.VertexAttribPointer(cast(u32)texAttrib, 2, gl.FLOAT, gl.FALSE, 4*size_of(f32), 2*size_of(f32)) 
+		gl.EnableVertexAttribArray(cast(u32)texAttrib)
+		this.first_run = false
+	}
 
-	gl.BindVertexArray(this.VAO)
+	gl.Uniform2f(gl.GetUniformLocation(this.program, "cameraPos"), camera.x/f32(SCREEN_WIDTH), camera.y/f32(SCREEN_HEIGHT))
+
+
+
 	gl.BindTexture(gl.TEXTURE_2D, textureatlas.atlasID);
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, this.VBO)
@@ -53,14 +62,19 @@ buttonRender :: proc(this: ^program) {
 	gl.UseProgram(this.program)
 	gl.BindVertexArray(this.VAO)
 	gl.BindTexture(gl.TEXTURE_2D, textureatlas.atlasID);
+	
+	if this.first_run == true {	
+		gl.BindBuffer(gl.ARRAY_BUFFER, this.VBO)
+		gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.EBO)
+		posAttrib := gl.GetAttribLocation(this.program, "position")
+		gl.VertexAttribPointer(cast(u32)posAttrib, 2, gl.FLOAT, gl.FALSE, 4*size_of(f32), 0) 
+		gl.EnableVertexAttribArray(cast(u32)posAttrib)
 
-	posAttrib := gl.GetAttribLocation(this.program, "position")
-	gl.VertexAttribPointer(cast(u32)posAttrib, 2, gl.FLOAT, gl.FALSE, 4*size_of(f32), 0) 
-	gl.EnableVertexAttribArray(cast(u32)posAttrib)
-
-	/*texAttrib := gl.GetAttribLocation(this.program, "texcoord")
-	gl.VertexAttribPointer(cast(u32)texAttrib, 2, gl.FLOAT, gl.FALSE, 4*size_of(f32), 2*size_of(f32)) 
-	gl.EnableVertexAttribArray(cast(u32)texAttrib)*/
+		texAttrib := gl.GetAttribLocation(this.program, "texcoord")
+		gl.VertexAttribPointer(cast(u32)texAttrib, 2, gl.FLOAT, gl.FALSE, 4*size_of(f32), 2*size_of(f32)) 
+		gl.EnableVertexAttribArray(cast(u32)texAttrib)
+		this.first_run = false
+	}
 	
 	buttons := getResource(button)
 	for buttonEntry in buttons.elements {
@@ -98,7 +112,7 @@ buttonRender :: proc(this: ^program) {
 		int_elements[4] = 3
 		int_elements[5] = 2
 
-		//gl.Uniform1i(gl.GetUniformLocation(this.program, "type"), cast(i32)entry.button_type)
+		gl.Uniform1i(gl.GetUniformLocation(this.program, "type"), cast(i32)entry.button_type)
 
 		colours_list : [16]f32
 		for colour, i in entry.button_colours {
@@ -108,16 +122,16 @@ buttonRender :: proc(this: ^program) {
 			colours_list[4 * i + 3] = cast(f32)colour.a
 		}
 
-		//gl.Uniform4fv(gl.GetUniformLocation(this.program, "colours"), 4, raw_data(colours_list[:]))
+		gl.Uniform4fv(gl.GetUniformLocation(this.program, "colours"), 4, raw_data(colours_list[:]))
 
-		//gl.BindVertexArray(this.VAO) //problematic line
-		//gl.BindBuffer(gl.ARRAY_BUFFER, this.VBO)
-		//gl.BufferData(gl.ARRAY_BUFFER, 16 * size_of(f32), raw_data(int_vertices[:]), gl.DYNAMIC_DRAW)
+		gl.BindVertexArray(this.VAO)
+		gl.BindBuffer(gl.ARRAY_BUFFER, this.VBO)
+		gl.BufferData(gl.ARRAY_BUFFER, 16 * size_of(f32), raw_data(int_vertices[:]), gl.DYNAMIC_DRAW)
 
-		//gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.EBO)
-		//gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, 6 * size_of(u32), raw_data(int_elements[:]), gl.DYNAMIC_DRAW)
+		gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.EBO)
+		gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, 6 * size_of(u32), raw_data(int_elements[:]), gl.DYNAMIC_DRAW)
 
-		//gl.DrawElements(gl.TRIANGLES, cast(i32)6, gl.UNSIGNED_INT, nil)
+		gl.DrawElements(gl.TRIANGLES, cast(i32)6, gl.UNSIGNED_INT, nil)
 	}
 }
 
@@ -130,15 +144,20 @@ textRender :: proc(this: ^program) {
 
 	gl.UseProgram(this.program)
 	gl.BindVertexArray(this.VAO)
-	gl.BindTexture(gl.TEXTURE_2D, textureatlas.atlasID);
+	gl.BindTexture(gl.TEXTURE_2D, textureatlas.atlasID)
 
-	posAttrib := gl.GetAttribLocation(this.program, "position")
-	gl.VertexAttribPointer(cast(u32)posAttrib, 2, gl.FLOAT, gl.FALSE, 4*size_of(f32), 0) 
-	gl.EnableVertexAttribArray(cast(u32)posAttrib)
+	if this.first_run == true {
+		gl.BindBuffer(gl.ARRAY_BUFFER, this.VBO)
+		gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.EBO)
+		posAttrib := gl.GetAttribLocation(this.program, "position")
+		gl.VertexAttribPointer(cast(u32)posAttrib, 2, gl.FLOAT, gl.FALSE, 4*size_of(f32), 0) 
+		gl.EnableVertexAttribArray(cast(u32)posAttrib)
 
-	texAttrib := gl.GetAttribLocation(this.program, "texcoord")
-	gl.VertexAttribPointer(cast(u32)texAttrib, 2, gl.FLOAT, gl.FALSE, 4*size_of(f32), 2*size_of(f32)) 
-	gl.EnableVertexAttribArray(cast(u32)texAttrib)
+		texAttrib := gl.GetAttribLocation(this.program, "texcoord")
+		gl.VertexAttribPointer(cast(u32)texAttrib, 2, gl.FLOAT, gl.FALSE, 4*size_of(f32), 2*size_of(f32)) 
+		gl.EnableVertexAttribArray(cast(u32)texAttrib)
+		this.first_run = false
+	}
 
 	charcount: u32 = 0
 	for i:=0; i < len(findStack("text").elements); i+=1 {

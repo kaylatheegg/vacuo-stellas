@@ -28,6 +28,7 @@ program :: struct {
 	renderCallback: proc(this: ^program),
 	vertices:       [dynamic]f32,
 	elements:       [dynamic]u32,
+	first_run:      bool,
 }
 
 loadProgram :: proc(fragment_path, vertex_path, name: string, callback: proc(this: ^program)) {
@@ -39,6 +40,7 @@ loadProgram :: proc(fragment_path, vertex_path, name: string, callback: proc(thi
 	intProgram.vertex = loadShader(vertex_path, .VERTEX_SHADER)
 	intProgram.name = name
 	intProgram.renderCallback = callback
+	intProgram.first_run = true
 
 	intProgram.program = gl.CreateProgram()
 	gl.AttachShader(intProgram.program, intProgram.vertex.id)
@@ -119,44 +121,3 @@ loadShader :: proc(filename: string, type: shader_type) -> (intShader: shader) {
 	intShader.id = shader_id
 	return
 }
-
-/*	glGetShaderiv(fragmentShaderID, GL_COMPILE_STATUS, &success);
-	if (success != GL_TRUE) {
-		glGetShaderInfoLog(fragmentShaderID, 512, NULL, infoLog);
-		*(strchr(infoLog, '\n')) = ' '; //removes the newline opengl shoves in
-		logtofile("Fragment shader compilation error!", ERR, "Render");
-		logtofile(infoLog, ERR, "Render");
-		printf("%s\n", intProgram->fragmentPath);
-		return -1;
-	}*/
-
-
-/*loadShaderData :: proc(shadertext: []u8) -> (intShader: shader) {
-	
-	intShader.text = make([^]cstring, 1)
-	intShader.line_count = 0;
-	for i := 0; i < len(shadertext); i+=1 {
-		if shadertext[i] == '\n' {
-			append_elem(&intShader.text[intShader.line_count], 0)
-			intShader.line_count += 1
-		}
-		append_elem(&intShader.text[intShader.line_count], shadertext[i]) 
-	}
-	return;
-}*/
-
-/*	UNUSED(name);
-	int chunkSize = 256;
-
-	shader* intShader = gmalloc(sizeof(*intShader));
-	intShader->code = gmalloc(sizeof(intShader->code));
-	intShader->code[0] = gmalloc(sizeof(*intShader->code) * chunkSize);
-	intShader->lineCount = 0;
-
-	while(fgets(intShader->code[intShader->lineCount], chunkSize, fp) != NULL) {
-		intShader->lineCount++;
-		intShader->code = grealloc(intShader->code, sizeof(intShader->code) * (intShader->lineCount + 1));
-		intShader->code[intShader->lineCount] = gmalloc(sizeof(*intShader->code) * chunkSize);
-	}
-	//addToDictionary(shaders, name, intShader);
-	return intShader;*/

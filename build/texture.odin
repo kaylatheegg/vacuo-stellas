@@ -29,6 +29,10 @@ atlas :: struct {
 textureatlas: atlas
 
 registerTexture :: proc(filename: string, name: string) {
+	if filename == "" || name == "" {
+		return
+	}
+	
 	if (regGetRegistryIndex(texture) == -1) {
 		addRegistry(texture)
 		gl.GenTextures(1, &textureatlas.atlasID);

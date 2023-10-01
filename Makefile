@@ -19,6 +19,8 @@ build:
 	cp -r src/entity/*	  build
 	cp -r src/entities/*  build
 	cp -r src/ui/*        build
+	cp -r src/world/*     build
+	cp -r src/physics/*   build
 
 	cp src/config.odin    build
 	

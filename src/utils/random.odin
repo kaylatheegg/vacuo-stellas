@@ -62,3 +62,7 @@ viuRand :: proc(start, end: i32) -> i32 {
 	return cast(i32)vfuRand(cast(f32)start, cast(f32)end)
 }
 
+vVec2fNormRand :: proc() -> vec2f {
+	//generates a random gradient vector (normalised)
+	return vec2RotatePoint((vec2f){0, 1}, (vec2f){0, 0}, vfuRand(0, 2*PI))
+}

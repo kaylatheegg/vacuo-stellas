@@ -42,9 +42,12 @@ addObject :: proc(x, y, w, h: f32, angle: radian, name: string, texture_name: st
 
 	int_entry := getAtlasEntry(texture_name)
 
-	if (int_entry == textureatlas.entries[0] && texture_name != "DEFAULT") {
+
+	if (texture_name != "" && int_entry == textureatlas.entries[0] && texture_name != "DEFAULT") {
 		log("Texture \"{}\" does not exist! Loading default.", .ERR, "Object", texture_name)
 	}
+
+
 
 	objectID: u32 = uID()
 
