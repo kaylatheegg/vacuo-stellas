@@ -76,16 +76,16 @@ main :: proc() {
 
 	initText()
 
-	addEntity(0, 0, 0, 0, 0, "camera", "DEFAULT", cameraCallback, 0)
+	//addEntity(0, 0, 0, 0, 0, "camera", "DEFAULT", cameraCallback, 0)
 
 
-	for i :i32= 0; i < 128; i+=1 {
+	/*for i :i32= 0; i < 128; i+=1 {
 		for j :i32= 0; j < 128; j+=1 {
 			if (i*j) % 8 == 0 {
 				createTile(j, i, .GRASS)
 			}
 		}		
-	}
+	}*/
 
 	addStack(f32, "fpsStack", .FIFO)
 

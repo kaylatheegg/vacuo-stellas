@@ -3,6 +3,12 @@ package vacuostellas
 import "core:slice"
 import "core:fmt"
 
+/*
+	this physics engine is based on the course Physically Based Modeling: Principles and Practice,
+	by David Baraff. link is https://www.cs.cmu.edu/~baraff/sigcourse/ , but im probably gonna
+	download it to prevent linkrot destroying how this engine works at a higher level.
+ */
+
 vsPCheckCollision :: proc(a, b: vsCollider) -> ([]vec2f, bool) {
 	return ([]vec2f){}, false
 }
@@ -25,14 +31,21 @@ vsPBroadPhase :: proc() -> [][2]vsBody {
 
 	bodies_resource := getResource(vsBody)
 	bodies: [dynamic]vsBody
+	defer clear(&bodies)
+
 
 	for body_ptr in bodies_resource.elements {
 		body := (cast(^vsBody)body_ptr.value)^
 		append(&bodies, body)
 	}
 
+	//this is sweep and prune/purge for the broad phase
+	//narrow phase is gonna suck but w/e
+
 	slice.sort_by(bodies[:], body_sort_proc) //sort by x value
 	active_intervals: [dynamic]vsBody
+	defer clear(&active_intervals)
+
 
 	append(&active_intervals, bodies[0])
 
@@ -77,6 +90,5 @@ vsPBroadPhase :: proc() -> [][2]vsBody {
 
 	}
 
-	clear(&active_intervals)
 	return collidedBodies[:]
 }

@@ -108,7 +108,7 @@ vsPPolyToBB :: proc(body: vsBody) -> vs_rectf32 {
 		sum_point += vertex
 	}
 
-	sum_point /= cast(f32)len(body.collider.points)
+	sum_point /= cast(f32)len(body.collider.points) //this is wrong.
 
 	//use jarvis march algorithm, from https://iq.opengenus.org/gift-wrap-jarvis-march-algorithm-convex-hull/
 
