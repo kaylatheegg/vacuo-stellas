@@ -11,11 +11,7 @@ button_type :: enum {
 }
 
 button :: struct {
-	bb: vs_rectf32,
-	name: string,
-
-	data_type: typeid,
-	data: rawptr,
+	ui_info: ^ui_element,
 	callback: proc(^button),
 
 	button_type: button_type, //kinda ugly
@@ -33,7 +29,7 @@ buttonWatchdog :: proc(this: ^entity, data: rawptr) {
 		int_button := (cast(^button)buttons.elements[i].value)^
 		x,y : i32
 		mouse_state := SDL.GetMouseState(&x, &y)
-		if pointInBB(int_button.bb, (vec2f){f32(x), f32(y)}) {
+		if pointInBB(int_button.ui_info.bb, (vec2f){f32(x), f32(y)}) {
 			if mouse_state & SDL.BUTTON_LMASK == 1 {
 				int_button->callback()
 			}
@@ -57,13 +53,11 @@ createButton :: proc(bb: vs_rectf32, name: string, data: $T, callback: proc(^but
 		log("Button gradient can only have 4 colours! Discarding the rest.", .ERR, "UI")
 	}
 
-
-
 	colours: [4]RGBA
 
 	if type != .TEXTURE {
 		for _, i in args {
-			if i <= 4 {
+			if i >= 4 {
 				break;
 			}
 			colours[i] = (cast(^RGBA)args[i].data)^

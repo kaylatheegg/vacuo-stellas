@@ -1,6 +1,23 @@
 package vacuostellas
 
 import SDL "vendor:sdl2"
+/*
+coordinate space
+       -
+       ^
+       |
+       |
+       |
+- <----+----> +
+       |
+       |
+       |
+       v
+       +
+
+ */
+
+
 
 
 /*
@@ -14,8 +31,11 @@ import SDL "vendor:sdl2"
 
 	TODO:
 		-Runtime
+			
+			return pointers from the resAddElement func
 			Cleanup functions for EVERYTHING
 			Add support for stacktraces
+
 
 		-Render
 			change the vertices to internally use vec2s
@@ -49,6 +69,7 @@ import SDL "vendor:sdl2"
 import "core:fmt"
 import "core:math/rand"
 import "core:math"
+import "core:sort"
 
 testEntityProc :: proc(this: ^entity, data: rawptr) {
 	(cast(^f32)data)^ += 1 * D2R * targetFPS * deltaTime
@@ -56,10 +77,39 @@ testEntityProc :: proc(this: ^entity, data: rawptr) {
 	objUpdate(this.object)
 }
 
-deltaTime : f32 = 15
+deltaTime: f32 = 15
+totalTime: f32 = 0; 
 
 testButtion :: proc(this: ^button) {
 	fmt.printf("TEST!!\n")
+}
+
+testObj :: proc(this: ^entity, data: rawptr) {
+	if this.body_ptr == nil {
+		vsPBodyNew(5, 0, (vec2f){this.object.x, this.object.y}, (vec2f){0, 0}, (vec2f){0,0}, 
+		0, 0, vsPCBBNew((vs_rectf32){64/2, -64/2, 64, 64}), false, this);
+	}
+
+	speed : f32 = 50.0
+
+	this.body_ptr.trans_velocity = (vec2f){0,0}
+
+	if keyboardState[SDL.Scancode.A] == 1 {
+		this.body_ptr.trans_velocity.x -= speed;
+	}
+	if keyboardState[i32(SDL.Scancode.D)] == 1 {
+		this.body_ptr.trans_velocity.x += speed;
+	}
+	if keyboardState[i32(SDL.Scancode.W)] == 1 {
+		this.body_ptr.trans_velocity.y += speed;
+	}
+	if keyboardState[i32(SDL.Scancode.S)] == 1 {
+		this.body_ptr.trans_velocity.y -= speed;
+	}
+
+	camera.x = this.object.x - SCREEN_WIDTH/2
+	camera.y = this.object.y - SCREEN_HEIGHT/2
+	//fmt.printf("Current pos: {}\n", this.body_ptr.position);
 }
 
 keyboardState : [^]u8
@@ -74,18 +124,23 @@ main :: proc() {
 
 	registerTexture("data/images/tiles/sand.png", "sand")
 
+	addEntity(0, 0, 0, 0, 0, "camera", "DEFAULT", cameraCallback, 0)
+
 	initText()
 
-	//addEntity(0, 0, 0, 0, 0, "camera", "DEFAULT", cameraCallback, 0)
+	addEntity(76, 120, 64, 64, 0, "testobj", "DEFAULT", testObj, 0)
 
-
-	/*for i :i32= 0; i < 128; i+=1 {
-		for j :i32= 0; j < 128; j+=1 {
+	for i :i32= 0; i < 64; i+=1 {
+		for j :i32= 0; j < 64; j+=1 {
 			if (i*j) % 8 == 0 {
 				createTile(j, i, .GRASS)
 			}
 		}		
-	}*/
+	}
+
+	
+
+	//createButton((vs_rectf32){400, 400, 100, 50}, "test button", 0, nil, .FLAT, 0x9F2233FF)
 
 	addStack(f32, "fpsStack", .FIFO)
 
@@ -117,7 +172,7 @@ main :: proc() {
 
 		endFrameTime = SDL.GetPerformanceCounter()
 		deltaTime = cast(f32)(endFrameTime - startFrameTime)/(cast(f32)SDL.GetPerformanceFrequency())
-
+		totalTime += deltaTime;
 		fpsText()
 	}
 

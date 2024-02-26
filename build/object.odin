@@ -2,14 +2,6 @@ package vacuostellas
 
 import "core:fmt"
 
-vs_rectf32 :: struct {
-	x, y, w, h: f32
-}
-
-vs_recti32 :: struct {
-	x, y, w, h: i32
-}
-
 object :: struct {
 	using pos: vs_rectf32,
 	angle: radian,
@@ -100,6 +92,11 @@ objUpdateVertices :: proc(id: u32, rect: vs_rectf32, tx_info: vs_recti32, angle:
 	 *23
 	 *01
 	 */
+
+
+	//tiny fix because rectangle widths are acting weird.
+	rect := rect; rect.w += 0.005;
+	
 	int_vertices : [4][4]f32
 	int_vertices[0][0] = vsmap(rect.x, 							 0., cast(f32)SCREEN_WIDTH,  -1., 1.)
 	int_vertices[0][1] = vsmap(rect.y, 							 0., cast(f32)SCREEN_HEIGHT, -1., 1.)

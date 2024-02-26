@@ -19,6 +19,8 @@ resource :: struct {
 
 resources : [dynamic]resource 
 
+
+
 addResource :: proc($type: typeid) -> int {
 	//need to check for duplicates here
 	append(&resources, resource{type, new([dynamic]res_entry)^})
@@ -86,6 +88,20 @@ resGetElementPointer :: proc($type: typeid, key: string) -> (value: ^type) {
 	return;
 }
 
+resGetElementPointerByID :: proc($type: typeid, id: u32) -> (value: ^type) {
+	resIndex := resGetResourceIndex(type)
+	if (resIndex == -1) {
+		log("Cannot find resource: %v", .ERR, "Resources", typeid_of(type));
+		return;
+	}
+
+	if id > cast(u32)(len(resources[resIndex].elements)) {
+		return;
+	}
+
+	return cast(^type)resources[resIndex].elements[id].value
+}
+
 resGetElementByID :: proc($type: typeid, id: u32) -> (value: type) {
 	assert(1==0, "implement this!")
 	resIndex := resGetResourceIndex(type)
@@ -96,17 +112,18 @@ resGetElementByID :: proc($type: typeid, id: u32) -> (value: type) {
 	return
 } //stub, reimpl
 
-resAddElement :: proc($type: typeid, key: string, value: $T) {
+resAddElement :: proc($type: typeid, key: string, value: $T) -> rawptr {
 	value := value
 	resIndex := resGetResourceIndex(type)
 	if (resIndex == -1) {
 		log("Cannot find resource: %v", .ERR, "Resources", typeid_of(type));
-		return;
+		return nil;
 	}
 
 	value_copy := new(type) //leaky
 	value_copy^ = cast(type)value
 	append(&resources[resIndex].elements, res_entry{key, value_copy})
+	return value_copy
 	//append(&resources[resIndex].elements, res_entry{key, value})
 }
 

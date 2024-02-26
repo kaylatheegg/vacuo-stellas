@@ -4,7 +4,8 @@ package vacuostellas
 //deriving this is annoying but i'll put a sparknotes ver here
 //we map [a,b] to [0, 1], and then map that to [A, B]
 
-PI :: 3.1415926535
+PI  :: 3.1415926535
+E_C :: 2.7182818285
 D2R :: PI/180
 R2D :: 180/PI
 

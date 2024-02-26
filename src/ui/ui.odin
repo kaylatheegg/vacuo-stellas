@@ -8,7 +8,7 @@ import SDL "vendor:sdl2"
 UI TODO:
 percentage bar
 dials?
-better support for text in buttons*/
+any support for text in buttons*/
 
 RGBA :: struct #raw_union {
 	using elem: struct #packed {
@@ -17,23 +17,20 @@ RGBA :: struct #raw_union {
 	rgba: u32,
 }
 
-button :: struct {
-	ui_info: ^ui_element,
-	callback: proc(^button),
-
-	button_type: button_type, //kinda ugly
-	button_colours: [4]RGBA,
-	txinfo: vs_recti32,
-}
-
 ui_element :: struct {
 	bb: vs_rectf32,
-	name: string
+	name: string,
 	data_type: typeid,
 	data: rawptr,
 }
 
-createUiElement :: proc(bb: vs_rectf32, name: string, data_type: typeid, data: rawptr) -> ^ui_element {
+createUiElement :: proc(bb: vs_rectf32, name: string, data_type: typeid, data: $T) -> ^ui_element {
 	data_alloc := new(type_of(data))
-	data_alloc^ = cast(type_of(data))data	
+	data_alloc^ = cast(type_of(data))data
+	if resGetResourceIndex(ui_element) == -1 {
+		addResource(ui_element)
+	}
+	int_element : ui_element = (ui_element){bb, name, data_type, data_alloc}
+	element_id := resAddElement(ui_element, name, int_element)
+	return resGetElementPointerByID(ui_element, element_id)
 }

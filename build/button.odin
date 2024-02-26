@@ -11,11 +11,7 @@ button_type :: enum {
 }
 
 button :: struct {
-	bb: vs_rectf32,
-	name: string,
-
-	data_type: typeid,
-	data: rawptr,
+	ui_info: ^ui_element,
 	callback: proc(^button),
 
 	button_type: button_type, //kinda ugly
@@ -33,7 +29,7 @@ buttonWatchdog :: proc(this: ^entity, data: rawptr) {
 		int_button := (cast(^button)buttons.elements[i].value)^
 		x,y : i32
 		mouse_state := SDL.GetMouseState(&x, &y)
-		if pointInBB(int_button.bb, (vec2f){f32(x), f32(y)}) {
+		if pointInBB(int_button.ui_info.bb, (vec2f){f32(x), f32(y)}) {
 			if mouse_state & SDL.BUTTON_LMASK == 1 {
 				int_button->callback()
 			}
@@ -57,14 +53,11 @@ createButton :: proc(bb: vs_rectf32, name: string, data: $T, callback: proc(^but
 		log("Button gradient can only have 4 colours! Discarding the rest.", .ERR, "UI")
 	}
 
-	data_alloc := new(type_of(data))
-	data_alloc^ = cast(type_of(data))data	
-
 	colours: [4]RGBA
 
 	if type != .TEXTURE {
 		for _, i in args {
-			if i <= 4 {
+			if i >= 4 {
 				break;
 			}
 			colours[i] = (cast(^RGBA)args[i].data)^
@@ -73,11 +66,11 @@ createButton :: proc(bb: vs_rectf32, name: string, data: $T, callback: proc(^but
 
 	#partial switch type {
 		case .FLAT:
-			resAddElement(button, name, (button){bb, name, type_of(data), data_alloc, callback, type, colours, getAtlasEntry("DEFAULT")})
+			resAddElement(button, name, (button){createUiElement(bb, name, type_of(data), data), callback, type, colours, getAtlasEntry("DEFAULT")})
 		case .GRADIENT:
-			resAddElement(button, name, (button){bb, name, type_of(data), data_alloc, callback, type, colours, getAtlasEntry("DEFAULT")})
+			resAddElement(button, name, (button){createUiElement(bb, name, type_of(data), data), callback, type, colours, getAtlasEntry("DEFAULT")})
 		case .TEXTURE:
-			resAddElement(button, name, (button){bb, name, type_of(data), data_alloc, callback, type, colours, getAtlasEntry((cast(^string)args[0].data)^)})
+			resAddElement(button, name, (button){createUiElement(bb, name, type_of(data), data), callback, type, colours, getAtlasEntry((cast(^string)args[0].data)^)})
 	}
 }
 

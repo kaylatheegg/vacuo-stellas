@@ -1,6 +1,7 @@
 package vacuostellas
 
 import "core:fmt"
+import "core:math"
 
 //id list of tiles
 
@@ -26,7 +27,7 @@ worldToChunkName :: proc(x, y: i32) -> string {
 }
 
 tileCallback :: proc(this: ^entity, data: rawptr) {
-	return
+	return;
 }
 
 createTile :: proc(x, y: i32, id: tile_type) {
@@ -39,8 +40,8 @@ createTile :: proc(x, y: i32, id: tile_type) {
 	ty := y & 0xF
 	int_chunk.tiles[ty][tx] = (tile){type = id, x = tx, y = ty, tile_ent = getEntity(
 		addEntity(f32(x*TILE_SIZE), f32(y*TILE_SIZE), TILE_SIZE, TILE_SIZE, 0., "Tile", tileTxMap[id][1], tileCallback, 0))}
-	vsPBodyNew(50, (vec2f){f32(x*TILE_SIZE), f32(y*TILE_SIZE)}, (vec2f){0,0}, (vec2f){0,0}, 
-		0, 0, vsPCBBNew((vs_rectf32){TILE_SIZE/2, -TILE_SIZE/2, TILE_SIZE, TILE_SIZE}), int_chunk.tiles[ty][tx].tile_ent)
+	vsPBodyNew(50, 0, (vec2f){f32(x*TILE_SIZE), f32(y*TILE_SIZE)}, (vec2f){0,0}, (vec2f){0,0}, 
+		0, 0, vsPCBBNew((vs_rectf32){TILE_SIZE/2, -TILE_SIZE/2, TILE_SIZE, TILE_SIZE}), true, int_chunk.tiles[ty][tx].tile_ent)
 }
 
 findChunk :: proc(x, y: i32) -> ^chunk {

@@ -11,6 +11,7 @@ entity :: struct {
 	callback: proc(this: ^entity, data: rawptr), 
 	entityID: u32,
 	data: rawptr,
+	body_ptr: ^vsBody,
 }
 
 addEntity :: proc(x, y, w, h: f32, angle: radian, name: string, texture_name: string, callback := stubCallback, data: $T) -> (id: u32) {
@@ -24,7 +25,7 @@ addEntity :: proc(x, y, w, h: f32, angle: radian, name: string, texture_name: st
 	data_alloc^ = cast(type_of(data))data
 
 	resAddElement(entity, name, (entity){getObjectByID(addObject(x,y,w,h,angle,name,texture_name)), //kinda nasty currying. try to clean this up
-										 callback, entity_id, data_alloc})
+										 callback, entity_id, data_alloc, nil})
 	return entity_id
 }
 
@@ -46,6 +47,7 @@ tickEntities :: proc() {
 	for entry in (getResource(entity)).elements {
 		(cast(^entity)entry.value)->callback((cast(^entity)entry.value).data)
 	}
+	vsPIterate();
 }
 
 

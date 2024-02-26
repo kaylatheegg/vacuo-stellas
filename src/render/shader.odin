@@ -111,7 +111,7 @@ loadShader :: proc(filename: string, type: shader_type) -> (intShader: shader) {
 	if (success != 1) {
 		gl.GetShaderInfoLog(shader_id, 512, nil, cast([^]u8)&info_log)
 		//do the \n hack for removing new lines
-		log("%v compilation error! Crashing.", .SVR, "Render", type)
+		log("%v compilation error in %s! Crashing.", .SVR, "Render", type, filename)
 		log(transmute(string)info_log[:], .SVR, "Render")
 		crash()
 	}

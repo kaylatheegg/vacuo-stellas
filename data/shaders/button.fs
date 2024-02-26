@@ -14,11 +14,11 @@ void main() {
       return;
    } else if (type == 1) {
       //lerp
-      for (i = 0; i < 4; i++) {
+      /*for (int i = 0; i < 4; i++) {
          if (colours[i] == vec4(0,0,0,0)) {
             break;
          }
-      }
+      }*/
       
       return;
    } else {

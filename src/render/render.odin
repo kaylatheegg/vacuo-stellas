@@ -25,6 +25,53 @@ render :: proc() {
 	return
 }
 
+colliderBBRender :: proc(this: ^program) {
+	gl.UseProgram(this.program)
+	gl.BindVertexArray(this.VAO)
+	if this.first_run == true {
+		gl.BindVertexArray(this.VAO)
+		gl.BindBuffer(gl.ARRAY_BUFFER, this.VBO)
+		gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.EBO)
+		posAttrib := gl.GetAttribLocation(this.program, "position")
+		gl.VertexAttribPointer(cast(u32)posAttrib, 2, gl.FLOAT, gl.FALSE, 2*size_of(f32), 0) 
+		gl.EnableVertexAttribArray(cast(u32)posAttrib)
+
+		this.first_run = false
+	}
+
+	gl.Uniform2f(gl.GetUniformLocation(this.program, "cameraPos"), camera.x/f32(SCREEN_WIDTH), camera.y/f32(SCREEN_HEIGHT))
+
+	bodies_resource := getResource(vsBody)
+
+	for i:=0; i < len(bodies_resource.elements); i+=1 {
+		intBody := cast(^vsBody)bodies_resource.elements[i].value
+		clear(&this.vertices)
+		//extract info about body BB
+		bb := intBody.collider.bb;
+		//BBs are defined at their center
+		BBVerts : [4]vec2f
+		BBVerts[0] = vec2f{bb.x - bb.w/2, bb.y + bb.h/2}
+		BBVerts[1] = vec2f{bb.x + bb.w/2, bb.y + bb.h/2}
+		BBVerts[2] = vec2f{bb.x + bb.w/2, bb.y - bb.h/2}
+		BBVerts[3] = vec2f{bb.x - bb.w/2, bb.y - bb.h/2}
+		//rotate the vertices
+		for j:=0; j<4; j+=1 {
+			BBVerts[j] = vec2RotatePoint(BBVerts[j], {bb.x, bb.y}, intBody.rotation);
+			BBVerts[j] += intBody.position
+			BBVerts[j] = vec2ClipSpace(BBVerts[j])
+			append(&this.vertices, ..BBVerts[j][:])
+		}
+
+		gl.Uniform1f(gl.GetUniformLocation(this.program, "zoomLevel"), zoom_level)
+
+		gl.Uniform3fv(gl.GetUniformLocation(this.program, "lineColour"), 1, raw_data((cast([]f32){255, 0.0, 0.0})))
+
+		gl.BindBuffer(gl.ARRAY_BUFFER, this.VBO)
+		gl.BufferData(gl.ARRAY_BUFFER, len(this.vertices) * size_of(f32), raw_data(this.vertices), gl.DYNAMIC_DRAW)
+		gl.DrawArrays(gl.LINE_LOOP, 0, 4);
+	}
+}
+
 objectRender :: proc(this: ^program) {
 	gl.UseProgram(this.program)
 	gl.BindVertexArray(this.VAO)
@@ -45,7 +92,11 @@ objectRender :: proc(this: ^program) {
 
 	gl.Uniform2f(gl.GetUniformLocation(this.program, "cameraPos"), camera.x/f32(SCREEN_WIDTH), camera.y/f32(SCREEN_HEIGHT))
 
+	gl.Uniform1f(gl.GetUniformLocation(this.program, "zoomLevel"), zoom_level);
 
+	rotMat := mat4RotateAroundPoint(camera_angle, vec2f{camera.x/f32(SCREEN_WIDTH), camera.y/f32(SCREEN_HEIGHT)})
+
+	gl.UniformMatrix4fv(gl.GetUniformLocation(this.program, "rotMat"), 1, false, &rotMat[0][0])
 
 	gl.BindTexture(gl.TEXTURE_2D, textureatlas.atlasID);
 
@@ -80,7 +131,7 @@ buttonRender :: proc(this: ^program) {
 	for buttonEntry in buttons.elements {
 		entry := (cast(^button)buttonEntry.value)^
 		//construct vertices
-		rect := entry.bb
+		rect := entry.ui_info.bb
 		tx_info := entry.txinfo
 
 		int_vertices : [4][4]f32
@@ -193,6 +244,8 @@ textRender :: proc(this: ^program) {
 			x += cast(i32)(cast(f32)stbtt.GetCodepointKernAdvance(&int_font.info, char, cast(rune)entry.text[index]) * 2. * int_font.scale)
 
 			rect.y -= cast(f32)int_font.ascent + cast(f32)int_font.chars[char].bbox.y
+
+
 
 			int_vertices : [4][4]f32
 			int_vertices[0][0] = vsmap(rect.x, 							 0., cast(f32)SCREEN_WIDTH,  -1., 1.)

@@ -3,16 +3,22 @@ package vacuostellas
 import "core:fmt"
 import "core:slice"
 
+//this physics engine will be UNABLE to handle rotating object collision. we will assume all objects are
+//BB and they can just Speen.
+
 vsBody :: struct {
 	mass: f32,
 	inv_mass: f32,
 	position: vec2f,
+	rotation: radian,
 	trans_velocity: vec2f,
 	trans_acceleration: vec2f,
 	angular_velocity: f32,
 	angular_acceleration: f32,
 	collider: vsCollider,
-	entity_ref: ^entity
+	locked: bool,
+	entity_ref: ^entity,
+	id: u32
 }
 
 vsc_type :: enum {
@@ -29,21 +35,23 @@ vsCollider :: struct {
 	radius: f32,
 }
 
-vsPBodyNew :: proc(mass: f32, position, velocity, acceleration: vec2f, angular_velocity, angular_acceleration: f32, collider: vsCollider, entity_ref: ^entity) -> vsBody {
+vsPBodyNew :: proc(mass, rotation: f32, position, velocity, acceleration: vec2f, angular_velocity, angular_acceleration: f32, collider: vsCollider, locked: bool, entity_ref: ^entity) {
 	if resGetResourceIndex(vsBody) == -1 {
 		addResource(vsBody)
+		loadProgram("data/shaders/line.fs", "data/shaders/line.vs", "BB Renderer", colliderBBRender)
 	}
 
-	int_body := (vsBody){mass, 1/mass, position, velocity, acceleration, angular_velocity, angular_acceleration, collider, entity_ref}
+	body_uuid := uID()
+	int_body := (vsBody){mass, 1/mass, position, rotation, velocity, acceleration, angular_velocity, angular_acceleration, collider, locked, entity_ref, body_uuid}
 	#partial switch int_body.collider.type {
 		case .CIRCLE:
 			int_body.collider.bb = vsPCircleToBB(int_body)
 		case .POLYGON: 
 			int_body.collider.bb = vsPPolyToBB(int_body)
 	}
-	body_uuid := fmt.aprintf("Body-{}", uID())
-	resAddElement(vsBody, body_uuid, int_body)
-	return int_body
+	
+	body_ptr := cast(^vsBody)resAddElement(vsBody, fmt.aprintf("Body-{}", body_uuid), int_body)
+	body_ptr.entity_ref.body_ptr = body_ptr;
 }
 
 vsPCCircleNew :: proc(value: f32) -> vsCollider {
